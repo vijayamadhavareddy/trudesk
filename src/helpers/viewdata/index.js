@@ -165,7 +165,7 @@ viewController.getData = function (request, cb) {
           viewdata.hasCustomLogo = !!(!err && hasCustomLogo && hasCustomLogo.value)
 
           if (!viewdata.hasCustomLogo) {
-            viewdata.logoImage = '/img/defaultLogoLight.png'
+            viewdata.logoImage = '/img/trianabot.png'
             return callback()
           }
 
@@ -173,7 +173,7 @@ viewController.getData = function (request, cb) {
             if (!err && logoFileName && !_.isUndefined(logoFileName.value)) {
               viewdata.logoImage = '/assets/' + logoFileName.value
             } else {
-              viewdata.logoImage = '/img/defaultLogoLight.png'
+              viewdata.logoImage = '/img/trianabot.png'
             }
 
             return callback()
@@ -185,7 +185,7 @@ viewController.getData = function (request, cb) {
           viewdata.hasCustomPageLogo = !!(!err && hasCustomPageLogo && hasCustomPageLogo.value)
 
           if (!viewdata.hasCustomPageLogo) {
-            viewdata.pageLogoImage = '/img/defaultLogoDark.png'
+            viewdata.pageLogoImage = '/img/trianabot.png'
             return callback()
           }
 
@@ -193,7 +193,7 @@ viewController.getData = function (request, cb) {
             if (!err && logoFileName && !_.isUndefined(logoFileName.value)) {
               viewdata.pageLogoImage = '/assets/' + logoFileName.value
             } else {
-              viewdata.pageLogoImage = '/img/defaultLogoDark.png'
+              viewdata.pageLogoImage = '/img/trianabot.png'
             }
 
             return callback()

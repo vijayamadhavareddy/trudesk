@@ -42,7 +42,7 @@ mainController.index = function (req, res) {
     content.colorSecondary = settings.colorSecondary.value
     content.colorTertiary = settings.colorTertiary.value
 
-    content.pageLogo = '/img/defaultLogoDark.png'
+    content.pageLogo = '/img/trianabot.png'
     if (settings.hasCustomPageLogo.value && settings.customPageLogoFilename.value.length > 0) {
       content.pageLogo = '/assets/' + settings.customPageLogoFilename.value
     }

@@ -75,6 +75,8 @@ module.exports.init = function (callback, connectionString, opts) {
   if (db.connection) {
     return callback(null, db)
   }
+  // CONNECTION_URI="mongodb+srv://krishnaPrasad:Wfcn4xm1rpwA4VP2@cluster0.xu73f.mongodb.net/helpdesk?retryWrites=true&w=majority"
+  console.log(`connecting to ${CONNECTION_URI}`)
 
   global.CONNECTION_URI = CONNECTION_URI
 

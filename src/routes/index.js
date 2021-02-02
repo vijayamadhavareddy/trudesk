@@ -73,10 +73,10 @@ function mainRoutes (router, middleware, controllers) {
             return res.send('/assets/topLogo.png')
           }
 
-          return res.send('/img/defaultLogoLight.png')
+          return res.send('/img/trianabot.png')
         })
       } else {
-        return res.send('/img/defaultLogoLight.png')
+        return res.send('/img/trianabot.png')
       }
     })
   })
