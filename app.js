@@ -21,11 +21,14 @@ var nconf = require('nconf')
 var Chance = require('chance')
 var chance = new Chance()
 var pkg = require('./package.json')
+const dotenv = require('dotenv');
 // `var memory = require('./src/memory');
 
 var isDocker = process.env.TRUDESK_DOCKER || false
 
 global.forks = []
+
+dotenv.config();
 
 nconf.argv().env()
 
@@ -126,7 +129,7 @@ function start () {
     } else {
       dbCallback(err, db)
     }
-  })
+  }, process.env.TD_MONGODB_URI)
 }
 
 function launchServer (db) {

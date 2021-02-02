@@ -19,6 +19,7 @@ var nconf = require('nconf')
 var _ = require('lodash')
 var winston = require('winston')
 var moment = require('moment-timezone')
+const dotenv = require('dotenv');
 
 var truCache = {}
 var cache
@@ -54,6 +55,9 @@ function loadConfig () {
   nconf.defaults({
     base_dir: __dirname
   })
+
+  dotenv.config()
+
 }
 
 var refreshTimer
@@ -264,10 +268,12 @@ truCache.refreshCache = function (callback) {
     }
   })
 
+  
   loadConfig()
   var db = require('../database')
-  db.init(function (err) {
-    if (err) return winston.error(err)
+  console.log('cache test outside');
+  if (db.connection) {
+    console.log('cache test');
     truCache.init(function (err) {
       if (err) {
         winston.error(err)
@@ -276,7 +282,19 @@ truCache.refreshCache = function (callback) {
 
       return process.exit(0)
     })
-  })
+  }else {
+    db.init(function (err) {
+      if (err) return winston.error(err)
+      truCache.init(function (err) {
+        if (err) {
+          winston.error(err)
+          throw new Error(err)
+        }
+  
+        return process.exit(0)
+      })
+    })
+  }
 })()
 
 module.exports = truCache
