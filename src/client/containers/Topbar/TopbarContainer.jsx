@@ -187,7 +187,7 @@ class TopbarContainer extends React.Component {
                       </li>
                     )}
                     {/* End Create Ticket Perm */}
-                    <li className='top-bar-icon'>
+                    {/* <li className='top-bar-icon'>
                       <PDropdownTrigger target={'conversations'}>
                         <a
                           title={'Conversations'}
@@ -227,7 +227,7 @@ class TopbarContainer extends React.Component {
                     </li>
                     <li className='top-bar-icon nopadding nohover'>
                       <i className='material-icons separator'>remove</i>
-                    </li>
+                    </li> */}
 
                     <li className='profile-area profile-name'>
                       <span>{viewdata.loggedInAccount.fullname}</span>
