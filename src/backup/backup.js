@@ -173,7 +173,7 @@ function runBackup (callback) {
 
         runBackup(function (err) {
           if (err) return process.send({ success: false, error: err })
-          var filename = 'trudesk-' + moment().format('MMDDYYYY_HHmm') + '.zip'
+          var filename = 'trianabot-' + moment().format('MMDDYYYY_HHmm') + '.zip'
 
           winston.info('Backup completed successfully: ' + filename)
           process.send({ success: true })

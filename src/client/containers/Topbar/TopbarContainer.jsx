@@ -160,10 +160,12 @@ class TopbarContainer extends React.Component {
           <div className='uk-width-1-1'>
             <div className='top-bar' data-topbar>
               <div className='title-area uk-float-left'>
-                <div className='logo'>
-                  <img src={viewdata.logoImage} alt='Logo' className={'site-logo'} />
+                <div className='logo'> 
+                <a id="expand-menu" class="no-ajaxy"><i class="material-icons" style={{color:"#fff",fontSize:"xx-large", marginTop:"21px"}}>menu</i></a>
+                  <img src={viewdata.logoImage} alt='Logo' className={'site-logo'} style={{marginBottom:"31px"}} />
                 </div>
               </div>
+              
               <section className='top-bar-section uk-clearfix'>
                 <div className='top-menu uk-float-right'>
                   <ul className='uk-subnav uk-margin-bottom-remove'>

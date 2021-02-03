@@ -28,6 +28,7 @@ mainController.index = function (req, res) {
   content.title = 'Login'
   content.layout = false
   content.flash = req.flash('loginMessage')
+  
 
   var settingsUtil = require('../settings/settingsUtil')
   settingsUtil.getSettings(function (err, s) {
@@ -47,7 +48,7 @@ mainController.index = function (req, res) {
       content.pageLogo = '/assets/' + settings.customPageLogoFilename.value
     }
 
-    content.bottom = 'Trudesk v' + pkg.version
+    content.bottom = 'Trianabot v' + pkg.version
 
     res.render('login', content)
   })
@@ -211,7 +212,7 @@ mainController.forgotL2Auth = function (req, res) {
         .then(function (html) {
           var mailOptions = {
             to: savedUser.email,
-            subject: '[Trudesk] Account Recovery',
+            subject: '[Trianabot] Account Recovery',
             html: html,
             generateTextFromHTML: true
           }

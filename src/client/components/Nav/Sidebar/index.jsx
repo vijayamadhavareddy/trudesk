@@ -135,13 +135,13 @@ class Sidebar extends React.Component {
             </Submenu>
           </SidebarItem>
         )}
-        <SidebarItem
+        {/* <SidebarItem
           text='Messages'
           icon='chat'
           href='/messages'
           class='navMessages'
           active={activeItem === 'messages'}
-        />
+        /> */}
         {sessionUser && Helpers.canUser('accounts:view') && (
           <SidebarItem
             text='Accounts'
@@ -237,7 +237,7 @@ class Sidebar extends React.Component {
 
         {/*{this.renderPlugins()}*/}
 
-        {sessionUser && Helpers.canUser('notices:view') && (
+        {/* {sessionUser && Helpers.canUser('notices:view') && (
           <SidebarItem
             text='Notices'
             icon='warning'
@@ -245,7 +245,7 @@ class Sidebar extends React.Component {
             class='navNotices'
             active={activeItem === 'notices'}
           />
-        )}
+        )} */}
 
         {sessionUser && Helpers.canUser('settings:edit') && (
           <SidebarItem
@@ -321,8 +321,8 @@ class Sidebar extends React.Component {
           </SidebarItem>
         )}
         <NavSeparator />
-        <SidebarItem href='/about' icon='help' text='About' active={activeItem === 'about'} />
-        <SidebarItem href={'https://www.trudesk.io'} icon={'cloud'} text={'Cloud'} target={'_blank'} />
+        {/* <SidebarItem href='/about' icon='help' text='About' active={activeItem === 'about'} /> */}
+        {/* <SidebarItem href={'https://www.trudesk.io'} icon={'cloud'} text={'Cloud'} target={'_blank'} /> */}
       </ul>
     )
   }

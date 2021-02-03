@@ -37,7 +37,7 @@ const composeSetup =
 /*eslint-enable */
 
 // if (process.env.NODE_ENV !== 'production') {
-localStorage.setItem('debug', 'trudesk:*') // Enable logger
+localStorage.setItem('debug', 'trianabot:*') // Enable logger
 // }
 
 const preloadedState = {
