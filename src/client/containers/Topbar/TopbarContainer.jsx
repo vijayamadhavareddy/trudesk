@@ -162,7 +162,7 @@ class TopbarContainer extends React.Component {
               <div className='title-area uk-float-left'>
                 <div className='logo'> 
                 <a id="expand-menu" class="no-ajaxy"><i class="material-icons" style={{color:"#fff",fontSize:"xx-large", marginTop:"21px"}}>menu</i></a>
-                  <img src={viewdata.logoImage} alt='Logo' className={'site-logo'} style={{marginBottom:"31px"}} />
+                  <img src={viewdata.logoImage} alt='Logo' className={'site-logo'} style={{marginBottom:"31px", marginLeft:"16px"}} />
                 </div>
               </div>
               

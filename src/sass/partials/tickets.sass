@@ -80,7 +80,7 @@ div#accountsTable_wrapper
 .floating-ticket-status
   position: absolute
   top: 22px
-  right: 18px
+  margin: 0px 189px
 
   .ticket-status span
     font-weight: 500
@@ -133,6 +133,8 @@ div#accountsTable_wrapper
       font-size: 18px
 
 .page-top-comments
+  position: absolute
+  margin: 0% 86%
   .active > a,
   .active > button
     background: darken($page_content_title_bg, 5%)
@@ -150,6 +152,8 @@ div#accountsTable_wrapper
     +borderRadius(3px)
     height: 28px
     line-height: 14px
+    width: 123%;
+
 
     &:hover
       background: darken($page_content_title_bg, 12%)
@@ -537,3 +541,32 @@ form.form
 input[type="text"][disabled]
   color: automatic-text-color($page_content_bg, 'muted')
   background: darken(#eceff6, 5%)
+
+
+.dropdown-type
+  margin: 0px 5px
+
+.dropdown-index
+  display: flex
+  margin: 21px 90px
+
+.dropdown-label-l
+  margin: 0px 6px;
+
+
+
+.uk-display-inline-l
+  display: inline-flex;
+
+.dropdown-down
+  height: 26px
+  border: transparent
+  border-radius: 5px
+  min-width: 70px
+
+
+.date-input
+  width: 46% !important
+
+.date-lable
+  margin-top: 0px !important

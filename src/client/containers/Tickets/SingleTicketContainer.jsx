@@ -251,11 +251,176 @@ class SingleTicketContainer extends React.Component {
         {this.ticket && (
           <Fragment>
             <div className={'page-content'}>
+            <div className='page-title-right noshadow'>
+            <div style={{display:'flex'}}>
+            <p>Ticket #{this.ticket.uid}</p>
+                  <StatusSelector
+                    ticketId={this.ticket._id}
+                    status={this.ticket.status}
+                    onStatusChange={status => (this.ticket.status = status)}
+                    hasPerm={helpers.hasPermOverRole(this.ticket.owner.role, null, 'tickets:update', true)}
+                  />
+
+                      <div className='dropdown-index'>
+                          <div className='dropdown-type'>
+                            {/* <span className='dropdown-label-l'>Type</span> */}
+                            {hasTicketUpdate && (
+                              <select
+                                className={'dropdown-down'}
+                                value={this.ticket.type._id}
+                                onChange={e => {
+                                  const type = this.props.common.ticketTypes.find(t => t._id === e.target.value)
+                                  const hasPriority =
+                                    type.priorities.findIndex(p => p._id === this.ticket.priority._id) !== -1
+
+                                  if (!hasPriority) {
+                                    socket.ui.setTicketPriority(this.ticket._id, type.priorities.find(() => true))
+                                    showPriorityConfirm()
+                                  }
+
+                                  socket.ui.setTicketType(this.ticket._id, e.target.value)
+                                }}
+                              >
+                                {mappedTypes &&
+                                  mappedTypes.map(type => (
+                                    <option key={type.value} value={type.value}>
+                                      {type.text}
+                                    </option>
+                                  ))}
+                              </select>
+                            )}
+                            {!hasTicketUpdate && <div className='input-box'>{this.ticket.type.name}</div>}
+                          </div>
+
+                          <div className='dropdown-type'>
+                          {/* <span className='dropdown-label-l'>Priority</span> */}
+                            {hasTicketUpdate && (
+                              <select
+                                className={'dropdown-down'}
+                                name='tPriority'
+                                id='tPriority'
+                                value={this.ticket.priority._id}
+                                onChange={e => socket.ui.setTicketPriority(this.ticket._id, e.target.value)}
+                              >
+                                {this.ticket.type &&
+                                  this.ticket.type.priorities &&
+                                  this.ticket.type.priorities.map(priority => (
+                                    <option key={priority._id} value={priority._id}>
+                                      {priority.name}
+                                    </option>
+                                  ))}
+                              </select>
+                            )}
+                            {!hasTicketUpdate && <div className={'input-box'}>{this.ticket.priority.name}</div>}
+                          </div>
+                          <div className='dropdown-type'>
+                          {/* <span className='dropdown-label-l'>Group</span> */}
+                          {hasTicketUpdate && (
+                            <select
+                              className={'dropdown-down'}
+                              value={this.ticket.group._id}
+                              onChange={e => {
+                                socket.ui.setTicketGroup(this.ticket._id, e.target.value)
+                              }}
+                            >
+                              {mappedGroups &&
+                                mappedGroups.map(group => (
+                                  <option key={group.value} value={group.value}>
+                                    {group.text}
+                                  </option>
+                                ))}
+                            </select>
+                          )}
+                          {!hasTicketUpdate && <div className={'input-box'}>{this.ticket.group.name}</div>}
+                        </div>
+                        <div className='dropdown-type'>
+                          <span>Due Date</span> {hasTicketUpdate && <span>-&nbsp;</span>}
+                          {hasTicketUpdate && (
+                            <div className='uk-display-inline-l date-input'>
+                              <DatePicker
+                                format={helpers.getShortDateFormat()}
+                                value={this.ticket.dueDate}
+                                onChange={e => {
+                                  const dueDate = moment(e.target.value, helpers.getShortDateFormat())
+                                    .utc()
+                                    .toISOString()
+                                  socket.ui.setTicketDueDate(this.ticket._id, dueDate)
+                                }}
+                              />
+                              <a
+                                role={'button'}
+                                className={'date-lable'}
+                                onClick={e => {
+                                  e.preventDefault()
+                                  socket.ui.setTicketDueDate(this.ticket._id, undefined)
+                                }}
+                              >x
+                              </a>
+                            </div>
+                          )}
+                          {!hasTicketUpdate && (
+                            <div className='input-box'>
+                              {helpers.formatDate(this.ticket.dueDate, this.props.common.shortDateFormat)}
+                            </div>
+                          )}
+                        </div>
+
+                        {/* Tags */}
+                        </div>
+
+                    
+                      
+               <div className='page-top-comments'>
+                    <a
+                      role='button'
+                      className='btn no-ajaxy'
+                      onClick={e => {
+                        e.preventDefault()
+                        helpers.scrollToBottom('.page-content-right', true)
+                      }}
+                    >
+                      Add Comment
+                    </a>
+                  </div>
+                  <div
+                    className='onoffswitch subscribeSwitch uk-float-right'
+                    style={{ marginLeft: "6%", top: 18 }}
+                  >
+                    <input
+                      id={'subscribeSwitch'}
+                      type='checkbox'
+                      name='subscribeSwitch'
+                      className='onoffswitch-checkbox'
+                      checked={this.isSubscribed}
+                      onChange={e => this.onSubscriberChanged(e)}
+                    />
+                    <label className='onoffswitch-label' htmlFor='subscribeSwitch'>
+                      <span className='onoffswitch-inner subscribeSwitch-inner' />
+                      <span className='onoffswitch-switch subscribeSwitch-switch' />
+                    </label>
+                  </div>
+                  <div className='pagination uk-float-right' style={{ marginRight: 5 }}>
+                    <ul className='button-group'>
+                      <li className='pagination'>
+                        <a
+                          href={`/tickets/print/${this.ticket.uid}`}
+                          className='btn no-ajaxy'
+                          style={{ borderRadius: 3, marginRight: 5 }}
+                          rel='noopener noreferrer'
+                          target='_blank'
+                        >
+                          <i className='material-icons'>&#xE8AD;</i>
+                        </a>
+                      </li>
+                    </ul>
+                  </div>
+                  </div>
+            </div>
               <div
-                className='uk-float-left page-title page-title-small noshadow nopadding relative'
+                className='uk-float-right page-title page-title-small noshadow nopadding relative'
                 style={{ width: 360, maxWidth: 360, minWidth: 360 }}
               >
-                <div className='page-title-border-right relative' style={{ padding: '0 30px' }}>
+                {/* <div className='page-title-border-right relative' style={{ padding: '0 30px' }}>
                   <p>Ticket #{this.ticket.uid}</p>
                   <StatusSelector
                     ticketId={this.ticket._id}
@@ -263,7 +428,7 @@ class SingleTicketContainer extends React.Component {
                     onStatusChange={status => (this.ticket.status = status)}
                     hasPerm={helpers.hasPermOverRole(this.ticket.owner.role, null, 'tickets:update', true)}
                   />
-                </div>
+                </div> */}
                 {/*  Left Side */}
                 <div className='page-content-left full-height scrollable'>
                   <div className='ticket-details-wrap uk-position-relative uk-clearfix'>
@@ -491,8 +656,9 @@ class SingleTicketContainer extends React.Component {
                 </div>
               </div>
               {/* Right Side */}
-              <div className='page-message nopadding' style={{ marginLeft: 360 }}>
-                <div className='page-title-right noshadow'>
+              <div className='page-message nopadding'>
+                {/* <div className='page-title-right noshadow'>
+                  
                   <div className='page-top-comments uk-float-right'>
                     <a
                       role='button'
@@ -537,7 +703,7 @@ class SingleTicketContainer extends React.Component {
                       </li>
                     </ul>
                   </div>
-                </div>
+                </div> */}
                 <div className='page-content-right full-height scrollable'>
                   <div className='comments-wrapper'>
                     <IssuePartial
