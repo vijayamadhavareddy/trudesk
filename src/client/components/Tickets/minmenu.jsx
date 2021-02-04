@@ -1,31 +1,27 @@
-import React from 'react'
-
+import React from 'react';
 
 class MinMenu extends React.Component {
-    constructor (props) {
+  constructor(props) {
     super(props);
-    console.log(props);    
+    console.log(props);
   }
 
-  render () {
-       const p4 = {     
-      padding: "4px",
-
+  render() {
+    const p4 = {
+      padding: '4px',
     };
     return (
-      <div className={'tickets-menu-items'}>
+      <div className={this.props.active ? 'menu-active' : 'tickets-menu-items'}>
         <a href={this.props.href}>
-         
-            <div>
-                 <i class="material-icons fa-sub-icon">{this.props.icon}</i>
-            </div>
-         <div className={'align-text-icons'}>
-              <span>{this.props.title}</span>
-         </div>
+          <div>
+            <i class="material-icons fa-sub-icon">{this.props.icon}</i>
+          </div>
+          <div className={'align-text-icons'}>
+            <span>{this.props.title}</span>
+          </div>
         </a>
       </div>
     );
   }
-
 }
-export default MinMenu
+export default MinMenu;

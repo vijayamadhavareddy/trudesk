@@ -15,7 +15,6 @@
 import React from 'react'
 import PropTypes from 'prop-types'
 import SubmenuItem from 'components/Nav/SubmenuItem'
-import MinMenu from 'components/Tickets/MinMenu'
 
 
 class PageTitle extends React.Component {
@@ -27,17 +26,7 @@ class PageTitle extends React.Component {
           <p className={'uk-float-left'}>{title}</p>
           <div className={'uk-float-right uk-clearfix uk-width-1-2'}>{rightComponent}</div>
         </div>
-        <div class="row " style={{display: 'flex'}}>
-          
-          <MinMenu title="Active" icon="timer" href="/tickets/active"></MinMenu>
-          <MinMenu title="Assigned" icon="assignment_ind" href="/tickets/assigned"></MinMenu>
-          <MinMenu title="Unassigned" icon="person_add_disabled" href="/tickets/unassigned"></MinMenu>
-          <MinMenu title="Pending" icon="&#xE629;" href="/tickets/pending"></MinMenu>
-          <MinMenu title="New" icon="&#xE24D;" href="/tickets/new"></MinMenu>
-          <MinMenu title="Open" icon="&#xE2C8;" href="/tickets/open"></MinMenu>
-          <MinMenu title="Closed" icon="&#xE2C7;" href="/tickets/closed"></MinMenu>
-        
-        </div>
+       
       </div>
     );
   }
