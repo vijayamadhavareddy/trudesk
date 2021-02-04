@@ -14,6 +14,8 @@
 
 import React from 'react'
 import PropTypes from 'prop-types'
+import SubmenuItem from 'components/Nav/SubmenuItem'
+
 
 class PageTitle extends React.Component {
   render () {
@@ -24,8 +26,9 @@ class PageTitle extends React.Component {
           <p className={'uk-float-left'}>{title}</p>
           <div className={'uk-float-right uk-clearfix uk-width-1-2'}>{rightComponent}</div>
         </div>
+       
       </div>
-    )
+    );
   }
 }
 
