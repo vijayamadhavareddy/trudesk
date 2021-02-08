@@ -51,5 +51,6 @@ apiController.v2.teams = require('./api/v2/teams')
 apiController.v2.departments = require('./api/v2/departments')
 apiController.v2.elasticsearch = require('./api/v2/elasticsearch')
 apiController.v2.mailer = require('./api/v2/mailer')
+apiController.v2.sentiment = require('./api/v2/sentiment')
 
 module.exports = apiController
