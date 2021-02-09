@@ -43,7 +43,7 @@ import anime from 'animejs';
 import moment from 'moment-timezone';
 import SearchResults from 'components/SearchResults';
 
-import MinMenu from 'components/Tickets/MinMenu';
+import MinMenu from '../../components/Tickets/minmenu';
 import { updateNavChange } from '../../../client/actions/nav';
 
 @observer
@@ -116,6 +116,7 @@ class TicketsContainer extends React.Component {
   }
 
   onTicketCheckChanged(e, id) {
+    console.log('check-ticket');
     if (e.target.checked) this.selectedTickets.push(id);
     else this.selectedTickets = without(this.selectedTickets, id);
 
@@ -214,6 +215,7 @@ class TicketsContainer extends React.Component {
   }
 
   onSelectAll(e) {
+    console.log('check-all');
     if (e.target.checked) this._selectAll();
     else this._clearChecked();
   }

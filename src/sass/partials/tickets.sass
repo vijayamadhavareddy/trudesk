@@ -298,7 +298,7 @@ div#accountsTable_wrapper
 
 .history-items
   //height: 185px
-  height: 214px
+  height: 80%
   width: 100%
 
   .history-item
@@ -601,3 +601,72 @@ input[type="text"][disabled]
     width: 101px !important
     height: 29px !important
 
+.tag-item
+  display: inline-block
+  float: left
+  font-size: 12px
+  font-family: $fontFamily
+  padding: 0 8px
+  margin: 2px 0 0 2px
+  max-height: 20px
+  background: #3498db
+  color: #ffffff
+  borderRadius(3px)
+
+.d-grid
+ display: grid
+
+.tag-overflow
+  white-space: nowrap;
+  width: 80%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+
+.mytooltip .mytext 
+  visibility: hidden;
+  background-color: #7c55a4;
+  color: #fff;
+  z-index: 1;
+  bottom: 90%;
+  text-align: center;
+  border-radius: 6px;
+  position: absolute;
+  opacity: 0.95;
+  font-size: 10px;
+
+.mytooltip 
+  position: relative
+.mytooltip .mytext:after 
+  content: "";
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  margin-left: -10px;
+  border-width: 7px;
+  border-style: solid;
+  border-color: #7c55a4 transparent transparent transparent;
+
+.mytooltip:hover .mytext 
+  visibility: visible;
+
+.tag-red
+ background: #d32f2f !important;
+ color: white !important;
+ width: 20%
+ text-align: center
+
+.tag-green
+  background: #29b955 !important
+  color: white !important;
+  width: 20%
+  text-align: center
+
+.comments
+  margin: 12px
+
+.input-width-65
+ width: 60%
+ 
+.input-width-65
+  input 
+   background: white !important

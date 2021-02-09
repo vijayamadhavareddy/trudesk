@@ -45,6 +45,13 @@ import UIkit from 'uikit';
 import moment from 'moment';
 import SpinLoader from 'components/SpinLoader';
 
+const sentimentPath = '/api/v2/sentiment';
+const comments = {
+  positive: 'fetchTicket',
+  negative: 'negative',
+};
+var History = [];
+
 const fetchTicket = (parent) => {
   axios
     .get(`/api/v2/tickets/${parent.props.ticketUid}`)
@@ -54,6 +61,9 @@ const fetchTicket = (parent) => {
       parent.isSubscribed =
         parent.ticket &&
         parent.ticket.subscribers.findIndex((i) => i._id === parent.props.shared.sessionUser._id) !== -1;
+      console.log('settig tic history');
+      History = res.data.ticket.history;
+      console.log(History);
       // }, 3000)
     })
     .catch((error) => {
@@ -88,6 +98,8 @@ class SingleTicketContainer extends React.Component {
   }
 
   componentDidMount() {
+    this.getComments('positive');
+    this.getComments('negative');
     socket.socket.on('updateComments', this.onSocketUpdateComments);
     socket.socket.on('updateNotes', this.onUpdateTicketNotes);
     socket.socket.on('updateAssignee', this.onUpdateAssignee);
@@ -178,6 +190,8 @@ class SingleTicketContainer extends React.Component {
 
           helpers.scrollToBottom('.page-content-right', true);
           this.ticket.history = res.data.ticket.history;
+          History = res.data.ticket.history;
+          console.log(History);
         }
       })
       .catch((error) => {
@@ -205,6 +219,22 @@ class SingleTicketContainer extends React.Component {
       });
   }
 
+  getTagName(tag) {
+    if (tag && tag.length && tag.length > 10) {
+      return { tooltip: true, tagName: tag.slice(0, 10) + '...' };
+    }
+    return { tooltip: true, tagName: tag };
+  }
+  getTagTemplate(tag, index) {
+    // console.log(tag, index);
+    if (index < 4) {
+      let { tooltip, tagName } = this.getTagName(tag.name);
+      let tooltipStr = '';
+      if (tooltip) tooltipStr = '<div class="mytooltip"> <span class="mytext">' + tag.name + '</span>';
+      return tooltipStr + '<div key=' + tag._id + ' class="item tag-item">' + tagName + ' </div>';
+    }
+    return '';
+  }
   @computed
   get notesTagged() {
     this.ticket.notes.forEach((i) => (i.isNote = true));
@@ -227,6 +257,54 @@ class SingleTicketContainer extends React.Component {
   @computed get hasCommentsOrNotes() {
     if (!this.ticket) return false;
     return this.ticket.comments.length > 0 || this.ticket.notes.length > 0;
+  }
+
+  getComments(path) {
+    if (!path) {
+      return '';
+    }
+    console.log(path);
+
+    // get(`${sentimentPath}/${path}`).then((res) => {
+    //   comments[path] = res.message;
+    //   console.log(res.message);
+    //   return res.message;
+    // });
+
+    // .then((res) => {
+    //   console.log(res);
+    //   this.comments[path]= res.message;
+    // })
+    // .catch((err) => {
+    //   console.log(err);
+    // });
+
+    axios
+      .get(`${sentimentPath}/${path}`)
+      .then((res) => {
+        // setTimeout(() => {
+        console.log(res.data);
+        comments[path] = res.data.message;
+      })
+      .catch((err) => {
+        console.log(err);
+      });
+  }
+
+  searchHistory(event) {
+    console.log(event);
+    const key = event.target.value;
+    if (!key) {
+      this.ticket.history = History;
+      return;
+    }
+    let filteredHistory = History.map((item) => {
+      if (item.description.includes(key)) {
+        return item;
+      }
+    }).filter((item) => item);
+    console.log(filteredHistory);
+    this.ticket.history = filteredHistory;
   }
 
   render() {
@@ -376,7 +454,7 @@ class SingleTicketContainer extends React.Component {
                     </div>
                   </div>
                   <div class="uk-float-right d-flex">
-                    <div className="onoffswitch subscribeSwitch uk-float-right" style={{ marginLeft: '6%', top: 18 }}>
+                    {/* <div className="onoffswitch subscribeSwitch uk-float-right" style={{ marginLeft: '6%', top: 18 }}>
                       <input
                         id={'subscribeSwitch'}
                         type="checkbox"
@@ -389,7 +467,7 @@ class SingleTicketContainer extends React.Component {
                         <span className="onoffswitch-inner subscribeSwitch-inner" />
                         <span className="onoffswitch-switch subscribeSwitch-switch" />
                       </label>
-                    </div>
+                    </div> */}
                     <div className="pagination " style={{ marginRight: 5 }}>
                       <ul className="button-group">
                         <li className="pagination">
@@ -437,63 +515,111 @@ class SingleTicketContainer extends React.Component {
                 <div className="page-content-left full-height scrollable">
                   <div className="ticket-details-wrap uk-position-relative uk-clearfix">
                     <div className="ticket-assignee-wrap uk-clearfix" style={{ paddingRight: 30 }}>
-                      <h4>Assignee</h4>
-                      <div className="ticket-assignee uk-clearfix">
+                      <div class="uk-float-left">
+                        <h4>Assignee</h4>
+                        <div className="ticket-assignee uk-clearfix">
+                          {hasTicketUpdate && (
+                            <a
+                              role="button"
+                              title="Set Assignee"
+                              style={{ float: 'left' }}
+                              className="relative no-ajaxy"
+                              onClick={() => socket.socket.emit('updateAssigneeList')}
+                            >
+                              <PDropdownTrigger target={'assigneeDropdown'}>
+                                <Avatar
+                                  image={this.ticket.assignee && this.ticket.assignee.image}
+                                  showOnlineBubble={this.ticket.assignee !== undefined}
+                                  userId={this.ticket.assignee && this.ticket.assignee._id}
+                                />
+                                <span className="drop-icon material-icons">keyboard_arrow_down</span>
+                              </PDropdownTrigger>
+                            </a>
+                          )}
+                          {!hasTicketUpdate && (
+                            <Avatar
+                              image={this.ticket.assignee && this.ticket.assignee.image}
+                              showOnlineBubble={this.ticket.assignee !== undefined}
+                              userId={this.ticket.assignee && this.ticket.assignee._id}
+                            />
+                          )}
+                          <div className="ticket-assignee-details">
+                            {!this.ticket.assignee && <h3>No User Assigned</h3>}
+                            {this.ticket.assignee && (
+                              <Fragment>
+                                <h3>{this.ticket.assignee.fullname}</h3>
+                                <a
+                                  className="comment-email-link uk-text-truncate uk-display-inline-block"
+                                  href={`mailto:${this.ticket.assignee.email}`}
+                                >
+                                  {this.ticket.assignee.email}
+                                </a>
+                                <span className={'uk-display-block'}>{this.ticket.assignee.title}</span>
+                              </Fragment>
+                            )}
+                          </div>
+                        </div>
+
                         {hasTicketUpdate && (
-                          <a
-                            role="button"
-                            title="Set Assignee"
-                            style={{ float: 'left' }}
-                            className="relative no-ajaxy"
-                            onClick={() => socket.socket.emit('updateAssigneeList')}
-                          >
-                            <PDropdownTrigger target={'assigneeDropdown'}>
-                              <Avatar
-                                image={this.ticket.assignee && this.ticket.assignee.image}
-                                showOnlineBubble={this.ticket.assignee !== undefined}
-                                userId={this.ticket.assignee && this.ticket.assignee._id}
-                              />
-                              <span className="drop-icon material-icons">keyboard_arrow_down</span>
-                            </PDropdownTrigger>
-                          </a>
-                        )}
-                        {!hasTicketUpdate && (
-                          <Avatar
-                            image={this.ticket.assignee && this.ticket.assignee.image}
-                            showOnlineBubble={this.ticket.assignee !== undefined}
-                            userId={this.ticket.assignee && this.ticket.assignee._id}
+                          <AssigneeDropdownPartial
+                            ticketId={this.ticket._id}
+                            onClearClick={() => (this.ticket.assignee = undefined)}
+                            onAssigneeClick={({ agent }) => (this.ticket.assignee = agent)}
                           />
                         )}
-                        <div className="ticket-assignee-details">
-                          {!this.ticket.assignee && <h3>No User Assigned</h3>}
-                          {this.ticket.assignee && (
+                      </div>
+                      {/* tags */}
+                      <div className="nopadding uk-float-right">
+                        <span>
+                          Tags
+                          {hasTicketUpdate && (
                             <Fragment>
-                              <h3>{this.ticket.assignee.fullname}</h3>
-                              <a
-                                className="comment-email-link uk-text-truncate uk-display-inline-block"
-                                href={`mailto:${this.ticket.assignee.email}`}
-                              >
-                                {this.ticket.assignee.email}
-                              </a>
-                              <span className={'uk-display-block'}>{this.ticket.assignee.title}</span>
+                              <span> - </span>
+                              <div id="editTags" className={'uk-display-inline'}>
+                                <a
+                                  role={'button'}
+                                  style={{ fontSize: 11 }}
+                                  className="no-ajaxy"
+                                  onClick={() => {
+                                    this.props.showModal('ADD_TAGS_MODAL', {
+                                      ticketId: this.ticket._id,
+                                      currentTags: this.ticket.tags.map((tag) => tag._id),
+                                    });
+                                  }}
+                                >
+                                  Edit Tags
+                                </a>
+                              </div>
                             </Fragment>
                           )}
+                        </span>
+                        <div className="tag-list uk-clearfix d-grid">
+                          {this.ticket.tags &&
+                            this.ticket.tags.map((tag, index) => (
+                              <span dangerouslySetInnerHTML={{ __html: this.getTagTemplate(tag, index) }}></span>
+                            ))}
                         </div>
                       </div>
-
-                      {hasTicketUpdate && (
-                        <AssigneeDropdownPartial
-                          ticketId={this.ticket._id}
-                          onClearClick={() => (this.ticket.assignee = undefined)}
-                          onAssigneeClick={({ agent }) => (this.ticket.assignee = agent)}
-                        />
-                      )}
                     </div>
+                  </div>
 
-                    <div className="uk-width-1-1 padding-left-right-15">
-                      <div className="tru-card ticket-details uk-clearfix">
-                        {/* Type */}
-                        {/* <div className='uk-width-1-2 uk-float-left nopadding'>
+                  <div className="uk-width-1-1 padding-left-right-15">
+                    <div className="tru-card ticket-details uk-clearfix">
+                      <div className="cursor-pointer tag-green uk-float-left">
+                        <span>Positive</span>
+                      </div>
+
+                      <div className="cursor-pointer tag-red uk-float-right">
+                        <span>Angry</span>
+                      </div>
+                      <br></br>
+                      <div class="comments">
+                        <div id="positive">{comments.positive}</div>
+                        <div id="negative">{comments.negative}</div>
+                      </div>
+
+                      {/* Type */}
+                      {/* <div className='uk-width-1-2 uk-float-left nopadding'>
                           <div className='marginright5'>
                             <span>Type</span>
                             {hasTicketUpdate && (
@@ -523,8 +649,8 @@ class SingleTicketContainer extends React.Component {
                             {!hasTicketUpdate && <div className='input-box'>{this.ticket.type.name}</div>}
                           </div>
                         </div> */}
-                        {/* Priority */}
-                        {/* <div className='uk-width-1-2 uk-float-left nopadding'>
+                      {/* Priority */}
+                      {/* <div className='uk-width-1-2 uk-float-left nopadding'>
                           <div className='marginleft5'>
                             <span>Priority</span>
                             {hasTicketUpdate && (
@@ -546,8 +672,8 @@ class SingleTicketContainer extends React.Component {
                             {!hasTicketUpdate && <div className={'input-box'}>{this.ticket.priority.name}</div>}
                           </div>
                         </div> */}
-                        {/*  Group */}
-                        {/* <div className='uk-width-1-1 nopadding uk-clearfix'>
+                      {/*  Group */}
+                      {/* <div className='uk-width-1-1 nopadding uk-clearfix'>
                           <span>Group</span>
                           {hasTicketUpdate && (
                             <select
@@ -566,8 +692,8 @@ class SingleTicketContainer extends React.Component {
                           )}
                           {!hasTicketUpdate && <div className={'input-box'}>{this.ticket.group.name}</div>}
                         </div> */}
-                        {/*  Due Date */}
-                        {/* <div className='uk-width-1-1 p-0'>
+                      {/*  Due Date */}
+                      {/* <div className='uk-width-1-1 p-0'>
                           <span>Due Date</span> {hasTicketUpdate && <span>-&nbsp;</span>}
                           {hasTicketUpdate && (
                             <div className={'uk-display-inline'}>
@@ -599,47 +725,16 @@ class SingleTicketContainer extends React.Component {
                           )}
                         </div> */}
 
-                        {/* Tags */}
-                        <div className="uk-width-1-1 nopadding">
-                          <span>
-                            Tags
-                            {hasTicketUpdate && (
-                              <Fragment>
-                                <span> - </span>
-                                <div id="editTags" className={'uk-display-inline'}>
-                                  <a
-                                    role={'button'}
-                                    style={{ fontSize: 11 }}
-                                    className="no-ajaxy"
-                                    onClick={() => {
-                                      this.props.showModal('ADD_TAGS_MODAL', {
-                                        ticketId: this.ticket._id,
-                                        currentTags: this.ticket.tags.map((tag) => tag._id),
-                                      });
-                                    }}
-                                  >
-                                    Edit Tags
-                                  </a>
-                                </div>
-                              </Fragment>
-                            )}
-                          </span>
-                          <div className="tag-list uk-clearfix">
-                            {this.ticket.tags &&
-                              this.ticket.tags.map((tag) => (
-                                <div key={tag._id} className="item">
-                                  {tag.name}
-                                </div>
-                              ))}
-                          </div>
-                        </div>
-                      </div>
+                      {/* Tags */}
                     </div>
 
                     {helpers.canUser('agent:*', true) && (
                       <div className="uk-width-1-1 padding-left-right-15">
                         <div className="tru-card ticket-details pr-0 pb-0" style={{ height: 250 }}>
                           Ticket History
+                          <div class="input-width-65 uk-float-right">
+                            <input type="text" placeholder="Search" onChange={(evt) => this.searchHistory(evt)} />
+                          </div>
                           <hr style={{ padding: 0, margin: 0 }} />
                           <div className="history-items scrollable" style={{ paddingTop: 12 }}>
                             {this.ticket.history &&
