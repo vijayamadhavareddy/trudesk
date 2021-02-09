@@ -35,6 +35,7 @@ import TruTabSection from 'components/TruTabs/TruTabSection';
 import TruTabSelector from 'components/TruTabs/TruTabSelector';
 import TruTabSelectors from 'components/TruTabs/TruTabSelectors';
 import TruTabWrapper from 'components/TruTabs/TruTabWrapper';
+import Dropdown from 'containers/Tickets/Dropdown';
 
 import axios from 'axios';
 import helpers from 'lib/helpers';
@@ -344,8 +345,9 @@ class SingleTicketContainer extends React.Component {
 
                     <div className="dropdown-index ">
                       <div className="dropdown-type">
+                        <Dropdown />
                         {/* <span className='dropdown-label-l'>Type</span> */}
-                        {hasTicketUpdate && (
+                        {/* {hasTicketUpdate && (
                           <select
                             className={'dropdown-down'}
                             value={this.ticket.type._id}
@@ -373,7 +375,7 @@ class SingleTicketContainer extends React.Component {
                               ))}
                           </select>
                         )}
-                        {!hasTicketUpdate && <div className="input-box">{this.ticket.type.name}</div>}
+                        {!hasTicketUpdate && <div className="input-box">{this.ticket.type.name}</div>} */}
                       </div>
 
                       <div className="dropdown-type">
