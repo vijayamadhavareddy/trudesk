@@ -222,7 +222,7 @@ class SingleTicketContainer extends React.Component {
     if (tag && tag.length && tag.length > 10) {
       return { tooltip: true, tagName: tag.slice(0, 10) + '...' };
     }
-    return { tooltip: true, tagName: tag };
+    return { tooltip: false, tagName: tag };
   }
   getTagTemplate(tag, index) {
     // console.log(tag, index);
@@ -451,7 +451,7 @@ class SingleTicketContainer extends React.Component {
                       </div>
                     </div>
                   </div>
-                  <div class="uk-float-right d-flex">
+                  <div class="align-header-right d-flex">
                     {/* <div className="onoffswitch subscribeSwitch uk-float-right" style={{ marginLeft: '6%', top: 18 }}>
                       <input
                         id={'subscribeSwitch'}
@@ -568,24 +568,42 @@ class SingleTicketContainer extends React.Component {
                       </div>
                       {/* tags */}
                       <div className="nopadding uk-float-right">
-                        <span>
+                        <span class="d-flex">
                           Tags
                           {hasTicketUpdate && (
                             <Fragment>
-                              <span> - </span>
-                              <div id="editTags" className={'uk-display-inline'}>
+                              <div id="editTags" className={'uk-display-inline'} class="p-left-10">
                                 <a
                                   role={'button'}
                                   style={{ fontSize: 11 }}
-                                  className="no-ajaxy"
+                                  className="no-ajaxy icon-hover"
                                   onClick={() => {
                                     this.props.showModal('ADD_TAGS_MODAL', {
                                       ticketId: this.ticket._id,
                                       currentTags: this.ticket.tags.map((tag) => tag._id),
+                                      editTags: true,
                                     });
                                   }}
                                 >
-                                  Edit Tags
+                                  {/* edit tags */}
+                                  <i class="material-icons font-20"></i>
+                                </a>
+                              </div>
+                              <div id="showtags" class="p-left-4">
+                                <a
+                                  role={'button'}
+                                  style={{ fontSize: 11 }}
+                                  className="no-ajaxy icon-hover"
+                                  onClick={() => {
+                                    this.props.showModal('ADD_TAGS_MODAL', {
+                                      ticketId: this.ticket._id,
+                                      currentTags: this.ticket.tags.map((tag) => tag._id),
+                                      editTags: false,
+                                    });
+                                  }}
+                                >
+                                  {/* show tags */}
+                                  <i class="material-icons remove_red_eye font-20">&#xe417;</i>
                                 </a>
                               </div>
                             </Fragment>
@@ -596,6 +614,25 @@ class SingleTicketContainer extends React.Component {
                             this.ticket.tags.map((tag, index) => (
                               <span dangerouslySetInnerHTML={{ __html: this.getTagTemplate(tag, index) }}></span>
                             ))}
+                          {/* {this.ticket.tags.length > 4 ? (
+                            <div id="editTags" className={'uk-display-inline'}>
+                              <a
+                                role={'button'}
+                                style={{ fontSize: 11 }}
+                                className="no-ajaxy"
+                                onClick={() => {
+                                  this.props.showModal('ADD_TAGS_MODAL', {
+                                    ticketId: this.ticket._id,
+                                    currentTags: this.ticket.tags.map((tag) => tag._id),
+                                  });
+                                }}
+                              >
+                                Show more
+                              </a>
+                            </div>
+                          ) : (
+                            ''
+                          )} */}
                         </div>
                       </div>
                     </div>
