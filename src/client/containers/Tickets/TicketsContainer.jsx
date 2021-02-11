@@ -88,8 +88,8 @@ class TicketsContainer extends React.Component {
 
     this.timeline.add({
       targets: 'tr.overdue td',
-      backgroundColor: '#b71c1c',
-      color: '#ffffff',
+      borderColor: '#b71c1c',
+      // color: '#ffffff',
     });
 
     this.timeline.play();
@@ -488,6 +488,7 @@ class TicketsContainer extends React.Component {
                   : '--';
 
                 const isOverdue = () => {
+                  console.log('showOverdue', this.props.common);
                   if (!this.props.common.showOverdue || [2, 3].indexOf(ticket.get('status')) !== -1) return false;
                   const overdueIn = ticket.getIn(['priority', 'overdueIn']);
                   const now = moment();

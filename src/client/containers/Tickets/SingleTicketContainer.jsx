@@ -11,7 +11,7 @@
  *  Copyright (c) 2014-2019 Trudesk, Inc. All rights reserved.
  */
 
-import React, { Fragment } from 'react';
+import React, { Fragment, Component } from 'react';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import { observable, computed } from 'mobx';
@@ -36,6 +36,7 @@ import TruTabSelector from 'components/TruTabs/TruTabSelector';
 import TruTabSelectors from 'components/TruTabs/TruTabSelectors';
 import TruTabWrapper from 'components/TruTabs/TruTabWrapper';
 import Dropdown from 'containers/Tickets/Dropdown';
+import Select from 'react-select';
 
 import axios from 'axios';
 import helpers from 'lib/helpers';
@@ -382,6 +383,10 @@ class SingleTicketContainer extends React.Component {
       this.ticket &&
       this.ticket.status !== 3 &&
       helpers.hasPermOverRole(this.ticket.owner.role, null, 'tickets:update', true);
+    const options1 = [
+      { label: 'Chocolate', value: 'chocolate' },
+      { label: 'Strawberry', value: 'strawberry' },
+    ];
 
     return (
       <div className={'uk-clearfix uk-position-relative'} style={{ width: '100%', height: '100vh' }}>
@@ -389,7 +394,7 @@ class SingleTicketContainer extends React.Component {
         {this.ticket && (
           <Fragment>
             <div className={'page-content'}>
-              <div className="page-title-right noshadow">
+              <div className="page-title-right noshadow page-sg">
                 <div class="d-flex" style={{ 'min-width': '75%' }}>
                   <div class="uk-float-left d-flex">
                     <p>Ticket #{this.ticket.uid}</p>
@@ -399,14 +404,47 @@ class SingleTicketContainer extends React.Component {
                       onStatusChange={(status) => (this.ticket.status = status)}
                       hasPerm={helpers.hasPermOverRole(this.ticket.owner.role, null, 'tickets:update', true)}
                     />
-
                     <div className="dropdown-index ">
                       <div className="dropdown-type">
-                        <Dropdown />
-                        {/* <span className='dropdown-label-l'>Type</span> */}
-                        {/* {hasTicketUpdate && (
+                        {hasTicketUpdate && (
+                          <Select
+                            className={'search-drop'}
+                            defaultValue={[
+                              {
+                                label: this.ticket.type.name,
+                                value: this.ticket.type._id,
+                              },
+                            ]}
+                            onChange={(e) => {
+                              const type = this.props.common.ticketTypes.find((t) => t._id === e.value);
+                              const hasPriority =
+                                type.priorities.findIndex((p) => p._id === this.ticket.priority._id) !== -1;
+
+                              if (!hasPriority) {
+                                socket.ui.setTicketPriority(
+                                  this.ticket._id,
+                                  type.priorities.find(() => true)
+                                );
+                                showPriorityConfirm();
+                              }
+
+                              socket.ui.setTicketType(this.ticket._id, e.value);
+                            }}
+                            options={mappedTypes.map((type) => {
+                              return {
+                                label: type.text,
+                                value: type.value,
+                              };
+                            })}
+                          />
+                        )}
+                        {!hasTicketUpdate && <div className="input-box">{this.ticket.type.name}</div>}
+                      </div>
+                      {/* <div className="dropdown-type">
+                       
+                        {hasTicketUpdate && (
                           <select
-                            className={'dropdown-down'}
+                            className={'dropdown-down pad-tkt'}
                             value={this.ticket.type._id}
                             onChange={(e) => {
                               const type = this.props.common.ticketTypes.find((t) => t._id === e.target.value);
@@ -432,14 +470,33 @@ class SingleTicketContainer extends React.Component {
                               ))}
                           </select>
                         )}
-                        {!hasTicketUpdate && <div className="input-box">{this.ticket.type.name}</div>} */}
-                      </div>
-
+                        {!hasTicketUpdate && <div className="input-box">{this.ticket.type.name}</div>}
+                      </div> */}
                       <div className="dropdown-type">
-                        {/* <span className='dropdown-label-l'>Priority</span> */}
+                        {hasTicketUpdate && (
+                          <Select
+                            className={'search-drop'}
+                            defaultValue={[
+                              {
+                                label: this.ticket.priority.name,
+                                value: this.ticket.priority._id,
+                              },
+                            ]}
+                            onChange={(e) => socket.ui.setTicketPriority(this.ticket._id, e.value)}
+                            options={this.ticket.type.priorities.map((priority) => {
+                              return {
+                                label: priority.name,
+                                value: priority._id,
+                              };
+                            })}
+                          />
+                        )}
+                        {!hasTicketUpdate && <div className={'input-box'}>{this.ticket.priority.name}</div>}
+                      </div>
+                      {/* <div className="dropdown-type">
                         {hasTicketUpdate && (
                           <select
-                            className={'dropdown-down'}
+                            className={'dropdown-down priority-cl'}
                             name="tPriority"
                             id="tPriority"
                             value={this.ticket.priority._id}
@@ -455,10 +512,33 @@ class SingleTicketContainer extends React.Component {
                           </select>
                         )}
                         {!hasTicketUpdate && <div className={'input-box'}>{this.ticket.priority.name}</div>}
-                      </div>
+                      </div> */}
                       <div className="dropdown-type">
-                        {/* <span className='dropdown-label-l'>Group</span> */}
                         {hasTicketUpdate && (
+                          <Select
+                            className={'search-drop'}
+                            defaultValue={[
+                              {
+                                label: this.ticket.group.name,
+                                value: this.ticket.group._id,
+                              },
+                            ]}
+                            onChange={(e) => {
+                              console.log(this.ticket.group.name);
+                              socket.ui.setTicketGroup(this.ticket._id, e.value);
+                            }}
+                            options={mappedGroups.map((group) => {
+                              return {
+                                label: group.text,
+                                value: group.value,
+                              };
+                            })}
+                          />
+                        )}
+                        {!hasTicketUpdate && <div className={'input-box'}>{this.ticket.group.name}</div>}
+                      </div>
+                      {/* <span className='dropdown-label-l'>Group</span> */}
+                      {/* {hasTicketUpdate && (
                           <select
                             className={'dropdown-down'}
                             value={this.ticket.group._id}
@@ -474,39 +554,41 @@ class SingleTicketContainer extends React.Component {
                               ))}
                           </select>
                         )}
-                        {!hasTicketUpdate && <div className={'input-box'}>{this.ticket.group.name}</div>}
-                      </div>
+                        {!hasTicketUpdate && <div className={'input-box'}>{this.ticket.group.name}</div>}  */}
+
                       <div className="dropdown-type">
-                        <span>Due Date</span> {hasTicketUpdate && <span>-&nbsp;</span>}
-                        {hasTicketUpdate && (
-                          <div className="uk-display-inline-l date-input">
-                            <DatePicker
-                              format={helpers.getShortDateFormat()}
-                              value={this.ticket.dueDate}
-                              onChange={(e) => {
-                                const dueDate = moment(e.target.value, helpers.getShortDateFormat())
-                                  .utc()
-                                  .toISOString();
-                                socket.ui.setTicketDueDate(this.ticket._id, dueDate);
-                              }}
-                            />
-                            <a
-                              role={'button'}
-                              className={'date-lable'}
-                              onClick={(e) => {
-                                e.preventDefault();
-                                socket.ui.setTicketDueDate(this.ticket._id, undefined);
-                              }}
-                            >
-                              x
-                            </a>
-                          </div>
-                        )}
-                        {!hasTicketUpdate && (
-                          <div className="input-box">
-                            {helpers.formatDate(this.ticket.dueDate, this.props.common.shortDateFormat)}
-                          </div>
-                        )}
+                        <div className="date-box">
+                          <span>Due Date</span> {hasTicketUpdate && <span>-&nbsp;</span>}
+                          {hasTicketUpdate && (
+                            <div className="uk-display-inline-l date-input">
+                              <DatePicker
+                                format={helpers.getShortDateFormat()}
+                                value={this.ticket.dueDate}
+                                onChange={(e) => {
+                                  const dueDate = moment(e.target.value, helpers.getShortDateFormat())
+                                    .utc()
+                                    .toISOString();
+                                  socket.ui.setTicketDueDate(this.ticket._id, dueDate);
+                                }}
+                              />
+                              <a
+                                role={'button'}
+                                className={'date-lable'}
+                                onClick={(e) => {
+                                  e.preventDefault();
+                                  socket.ui.setTicketDueDate(this.ticket._id, undefined);
+                                }}
+                              >
+                                x
+                              </a>
+                            </div>
+                          )}
+                          {!hasTicketUpdate && (
+                            <div className="input-box">
+                              {helpers.formatDate(this.ticket.dueDate, this.props.common.shortDateFormat)}
+                            </div>
+                          )}
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -625,6 +707,7 @@ class SingleTicketContainer extends React.Component {
                           />
                         )}
                       </div>
+
                       {/* tags */}
                       <div className="nopadding uk-float-right">
                         <span class="d-flex">

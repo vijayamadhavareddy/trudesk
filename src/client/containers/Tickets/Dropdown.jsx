@@ -1,8 +1,9 @@
 import React from 'react';
+import PropTypes from 'prop-types';
 
 class Dropdown extends React.Component {
-  constructor() {
-    super();
+  constructor(props) {
+    super(props);
 
     this.state = {
       displayMenu: false,
@@ -20,6 +21,7 @@ class Dropdown extends React.Component {
     event.preventDefault();
     this.setState({ displayMenu: true }, () => {
       document.addEventListener('click', this.hideDropdownMenu);
+      console.log('ticket', this.props.options);
     });
   }
 
@@ -33,15 +35,14 @@ class Dropdown extends React.Component {
     return (
       <div className="dropdown-ld">
         <div className="button-ld" onClick={this.showDropdownMenu}>
-          {' '}
-          issue{' '}
+          {this.props.ticket.type.name}
         </div>
 
         {this.state.displayMenu ? (
           <div>
-            {this.state.items.map((item) => (
-              <span className={item.className}>
-                <span>{item.name}</span>
+            {this.props.options.map((item) => (
+              <span className="ticket-status ticket-new drop-ls-tkt">
+                <span className="pad-tkt">{item.name}</span>
               </span>
             ))}
           </div>
@@ -50,5 +51,10 @@ class Dropdown extends React.Component {
     );
   }
 }
+
+Dropdown.propTypes = {
+  ticket: PropTypes.string.isRequired,
+  options: PropTypes.string.isRequired,
+};
 
 export default Dropdown;
