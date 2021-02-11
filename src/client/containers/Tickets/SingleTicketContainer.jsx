@@ -337,7 +337,7 @@ class SingleTicketContainer extends React.Component {
         {this.ticket && (
           <Fragment>
             <div className={'page-content'}>
-              <div className="page-title-right noshadow">
+              <div className="page-title-right noshadow page-sg">
                 <div class="d-flex" style={{ 'min-width': '75%' }}>
                   <div class="uk-float-left d-flex">
                     <p>Ticket #{this.ticket.uid}</p>
@@ -349,8 +349,42 @@ class SingleTicketContainer extends React.Component {
                     />
                     <div className="dropdown-index ">
                       <div className="dropdown-type">
-                        {/* <Dropdown ticket={this.ticket} options={this.props.common.ticketTypes} /> */}
-                        {/* <span className="dropdown-label-l">Type</span> */}
+                        {hasTicketUpdate && (
+                          <Select
+                            className={'search-drop'}
+                            defaultValue={[
+                              {
+                                label: this.ticket.type.name,
+                                value: this.ticket.type._id,
+                              },
+                            ]}
+                            onChange={(e) => {
+                              const type = this.props.common.ticketTypes.find((t) => t._id === e.value);
+                              const hasPriority =
+                                type.priorities.findIndex((p) => p._id === this.ticket.priority._id) !== -1;
+
+                              if (!hasPriority) {
+                                socket.ui.setTicketPriority(
+                                  this.ticket._id,
+                                  type.priorities.find(() => true)
+                                );
+                                showPriorityConfirm();
+                              }
+
+                              socket.ui.setTicketType(this.ticket._id, e.value);
+                            }}
+                            options={mappedTypes.map((type) => {
+                              return {
+                                label: type.text,
+                                value: type.value,
+                              };
+                            })}
+                          />
+                        )}
+                        {!hasTicketUpdate && <div className="input-box">{this.ticket.type.name}</div>}
+                      </div>
+                      {/* <div className="dropdown-type">
+                       
                         {hasTicketUpdate && (
                           <select
                             className={'dropdown-down pad-tkt'}
@@ -380,10 +414,29 @@ class SingleTicketContainer extends React.Component {
                           </select>
                         )}
                         {!hasTicketUpdate && <div className="input-box">{this.ticket.type.name}</div>}
-                      </div>
-
+                      </div> */}
                       <div className="dropdown-type">
-                        {/* <span className='dropdown-label-l'>Priority</span> */}
+                        {hasTicketUpdate && (
+                          <Select
+                            className={'search-drop'}
+                            defaultValue={[
+                              {
+                                label: this.ticket.priority.name,
+                                value: this.ticket.priority._id,
+                              },
+                            ]}
+                            onChange={(e) => socket.ui.setTicketPriority(this.ticket._id, e.value)}
+                            options={this.ticket.type.priorities.map((priority) => {
+                              return {
+                                label: priority.name,
+                                value: priority._id,
+                              };
+                            })}
+                          />
+                        )}
+                        {!hasTicketUpdate && <div className={'input-box'}>{this.ticket.priority.name}</div>}
+                      </div>
+                      {/* <div className="dropdown-type">
                         {hasTicketUpdate && (
                           <select
                             className={'dropdown-down priority-cl'}
@@ -402,27 +455,31 @@ class SingleTicketContainer extends React.Component {
                           </select>
                         )}
                         {!hasTicketUpdate && <div className={'input-box'}>{this.ticket.priority.name}</div>}
+                      </div> */}
+                      <div className="dropdown-type">
+                        {hasTicketUpdate && (
+                          <Select
+                            className={'search-drop'}
+                            defaultValue={[
+                              {
+                                label: this.ticket.group.name,
+                                value: this.ticket.group._id,
+                              },
+                            ]}
+                            onChange={(e) => {
+                              console.log(this.ticket.group.name);
+                              socket.ui.setTicketGroup(this.ticket._id, e.value);
+                            }}
+                            options={mappedGroups.map((group) => {
+                              return {
+                                label: group.text,
+                                value: group.value,
+                              };
+                            })}
+                          />
+                        )}
+                        {!hasTicketUpdate && <div className={'input-box'}>{this.ticket.group.name}</div>}
                       </div>
-
-                      <Select
-                        className={'search-drop'}
-                        defaultValue={[
-                          {
-                            label: this.ticket.group.name,
-                            value: this.ticket.group._id,
-                          },
-                        ]}
-                        onChange={(e) => {
-                          console.log(this.ticket.group.name);
-                          socket.ui.setTicketGroup(this.ticket._id, e.value);
-                        }}
-                        options={mappedGroups.map((group) => {
-                          return {
-                            label: group.text,
-                            value: group.value,
-                          };
-                        })}
-                      />
                       {/* <span className='dropdown-label-l'>Group</span> */}
                       {/* {hasTicketUpdate && (
                           <select
@@ -593,6 +650,7 @@ class SingleTicketContainer extends React.Component {
                           />
                         )}
                       </div>
+
                       {/* tags */}
                       <div className="nopadding uk-float-right">
                         <span class="d-flex">
