@@ -58,6 +58,7 @@
     "jsonwebtoken": "8.4.0",
     "ldapjs": "1.0.2",
     "lodash": "4.17.11",
+    "lodash.debounce": "4.0.8",
     "mailparser": "2.4.3",
     "marked": "0.6.1",
     "matchdep": "2.0.0",

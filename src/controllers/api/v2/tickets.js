@@ -12,112 +12,114 @@
  *  Copyright (c) 2014-2019. All rights reserved.
  */
 
-var _ = require('lodash')
-var async = require('async')
-var winston = require('winston')
-var apiUtils = require('../apiUtils')
-var Ticket = require('../../../models/ticket')
-var Group = require('../../../models/group')
-var Department = require('../../../models/department')
+var _ = require('lodash');
+var async = require('async');
+var winston = require('winston');
+var apiUtils = require('../apiUtils');
+var Ticket = require('../../../models/ticket');
+var Group = require('../../../models/group');
+var TicketHistory = require('../../../models/tickethistory');
+var Department = require('../../../models/department');
+const { Mongoose } = require('mongoose');
 
-var ticketsV2 = {}
+var ticketsV2 = {};
 
 ticketsV2.create = function (req, res) {
-  var postTicket = req.body
-  if (!postTicket) return apiUtils.sendApiError_InvalidPostData(res)
-}
+  var postTicket = req.body;
+  if (!postTicket) return apiUtils.sendApiError_InvalidPostData(res);
+};
 
 ticketsV2.get = function (req, res) {
-  var query = req.query
-  var type = query.type || 'all'
+  var query = req.query;
+  var type = query.type || 'all';
 
   try {
-    var limit = query.limit ? parseInt(query.limit) : 50
-    var page = query.page ? parseInt(query.page) : 0
+    var limit = query.limit ? parseInt(query.limit) : 50;
+    var page = query.page ? parseInt(query.page) : 0;
   } catch (e) {
-    winston.debug(e)
-    return apiUtils.sendApiError_InvalidPostData(res)
+    winston.debug(e);
+    return apiUtils.sendApiError_InvalidPostData(res);
   }
 
   var queryObject = {
     limit: limit,
-    page: page
-  }
+    page: page,
+  };
 
   async.waterfall(
     [
       function (next) {
         if (req.user.role.isAdmin || req.user.role.isAgent) {
           Department.getDepartmentGroupsOfUser(req.user._id, function (err, dbGroups) {
-            if (err) return next(err)
+            if (err) return next(err);
 
             var groups = dbGroups.map(function (g) {
-              return g._id
-            })
+              return g._id;
+            });
 
-            return next(null, groups)
-          })
+            return next(null, groups);
+          });
         } else {
-          Group.getAllGroupsOfUser(req.user._id, next)
+          Group.getAllGroupsOfUser(req.user._id, next);
         }
       },
       function (groups, next) {
         var mappedGroups = groups.map(function (g) {
-          return g._id
-        })
+          return g._id;
+        });
 
         switch (type.toLowerCase()) {
           case 'active':
-            queryObject.status = [0, 1, 2]
-            break
+            queryObject.status = [0, 1, 2];
+            break;
           case 'assigned':
             queryObject.filter = {
-              assignee: [req.user._id]
-            }
-            break
+              assignee: [req.user._id],
+            };
+            break;
           case 'unassigned':
-            queryObject.unassigned = true
-            break
+            queryObject.unassigned = true;
+            break;
           case 'new':
-            queryObject.status = [0]
-            break
+            queryObject.status = [0];
+            break;
           case 'open':
-            queryObject.status = [1]
-            break
+            queryObject.status = [1];
+            break;
           case 'pending':
-            queryObject.status = [2]
-            break
+            queryObject.status = [2];
+            break;
           case 'closed':
-            queryObject.status = [3]
-            break
+            queryObject.status = [3];
+            break;
           case 'filter':
             try {
-              queryObject.filter = JSON.parse(query.filter)
-              queryObject.status = queryObject.filter.status
+              queryObject.filter = JSON.parse(query.filter);
+              queryObject.status = queryObject.filter.status;
             } catch (error) {
-              winston.warn(error)
+              winston.warn(error);
             }
-            break
+            break;
         }
 
         Ticket.getTicketsWithObject(mappedGroups, queryObject, function (err, tickets) {
-          if (err) return next(err)
-          return next(null, mappedGroups, tickets)
-        })
+          if (err) return next(err);
+          return next(null, mappedGroups, tickets);
+        });
       },
       function (mappedGroups, tickets, done) {
         Ticket.getCountWithObject(mappedGroups, queryObject, function (err, count) {
-          if (err) return done(err)
+          if (err) return done(err);
 
           return done(null, {
             tickets: tickets,
-            totalCount: count
-          })
-        })
-      }
+            totalCount: count,
+          });
+        });
+      },
     ],
     function (err, resultObject) {
-      if (err) return apiUtils.sendApiError(res, 500, err.message)
+      if (err) return apiUtils.sendApiError(res, 500, err.message);
 
       return apiUtils.sendApiSuccess(res, {
         tickets: resultObject.tickets,
@@ -125,89 +127,125 @@ ticketsV2.get = function (req, res) {
         totalCount: resultObject.totalCount,
         page: page,
         prevPage: page === 0 ? 0 : page - 1,
-        nextPage: page * limit + limit <= resultObject.totalCount ? page + 1 : page
-      })
+        nextPage: page * limit + limit <= resultObject.totalCount ? page + 1 : page,
+      });
     }
-  )
-}
+  );
+};
 
 ticketsV2.single = function (req, res) {
-  var uid = req.params.uid
-  if (!uid) return apiUtils.sendApiError(res, 400, 'Invalid Parameters')
+  var uid = req.params.uid;
+  if (!uid) return apiUtils.sendApiError(res, 400, 'Invalid Parameters');
   Ticket.getTicketByUid(uid, function (err, ticket) {
-    if (err) return apiUtils.sendApiError(res, 500, err)
+    if (err) return apiUtils.sendApiError(res, 500, err);
 
-    return apiUtils.sendApiSuccess(res, { ticket: ticket })
-  })
-}
+    return apiUtils.sendApiSuccess(res, { ticket: ticket });
+  });
+};
 
 ticketsV2.update = function (req, res) {
-  var uid = req.params.uid
-  var putTicket = req.body.ticket
-  if (!uid || !putTicket) return apiUtils.sendApiError(res, 400, 'Invalid Parameters')
+  var uid = req.params.uid;
+  var putTicket = req.body.ticket;
+  if (!uid || !putTicket) return apiUtils.sendApiError(res, 400, 'Invalid Parameters');
 
   // todo: complete this...
   Ticket.getTicketByUid(uid, function (err, ticket) {
-    if (err) return apiUtils.sendApiError(res, 500, err.message)
+    if (err) return apiUtils.sendApiError(res, 500, err.message);
 
-    return apiUtils.sendApiSuccess(res, ticket)
-  })
-}
+    return apiUtils.sendApiSuccess(res, ticket);
+  });
+};
 
 ticketsV2.batchUpdate = function (req, res) {
-  var batch = req.body.batch
-  if (!_.isArray(batch)) return apiUtils.sendApiError_InvalidPostData(res)
+  var batch = req.body.batch;
+  if (!_.isArray(batch)) return apiUtils.sendApiError_InvalidPostData(res);
 
   async.each(
     batch,
     function (batchTicket, next) {
       Ticket.getTicketById(batchTicket.id, function (err, ticket) {
-        if (err) return next(err)
+        if (err) return next(err);
 
         if (!_.isUndefined(batchTicket.status)) {
-          ticket.status = batchTicket.status
+          ticket.status = batchTicket.status;
           var HistoryItem = {
             action: 'ticket:set:status',
             description: 'status set to: ' + batchTicket.status,
-            owner: req.user._id
-          }
+            owner: req.user._id,
+          };
 
-          ticket.history.push(HistoryItem)
+          ticket.history.push(HistoryItem);
         }
 
-        return ticket.save(next)
-      })
+        return ticket.save(next);
+      });
     },
     function (err) {
-      if (err) return apiUtils.sendApiError(res, 400, err.message)
+      if (err) return apiUtils.sendApiError(res, 400, err.message);
 
-      return apiUtils.sendApiSuccess(res)
+      return apiUtils.sendApiSuccess(res);
     }
-  )
-}
+  );
+};
 
 ticketsV2.delete = function (req, res) {
-  var uid = req.params.uid
-  if (!uid) return apiUtils.sendApiError(res, 400, 'Invalid Parameters')
+  var uid = req.params.uid;
+  if (!uid) return apiUtils.sendApiError(res, 400, 'Invalid Parameters');
 
   Ticket.softDeleteUid(uid, function (err, success) {
-    if (err) return apiUtils.sendApiError(res, 500, err.message)
-    if (!success) return apiUtils.sendApiError(res, 500, 'Unable to delete ticket')
+    if (err) return apiUtils.sendApiError(res, 500, err.message);
+    if (!success) return apiUtils.sendApiError(res, 500, 'Unable to delete ticket');
 
-    return apiUtils.sendApiSuccess(res, { deleted: true })
-  })
-}
+    return apiUtils.sendApiSuccess(res, { deleted: true });
+  });
+};
 
 ticketsV2.permDelete = function (req, res) {
-  var id = req.params.id
-  if (!id) return apiUtils.sendApiError(res, 400, 'Invalid Parameters')
+  var id = req.params.id;
+  if (!id) return apiUtils.sendApiError(res, 400, 'Invalid Parameters');
 
   Ticket.deleteOne({ _id: id }, function (err, success) {
-    if (err) return apiUtils.sendApiError(res, 400, err.message)
-    if (!success) return apiUtils.sendApiError(res, 400, 'Unable to delete ticket')
+    if (err) return apiUtils.sendApiError(res, 400, err.message);
+    if (!success) return apiUtils.sendApiError(res, 400, 'Unable to delete ticket');
 
-    return apiUtils.sendApiSuccess(res, { deleted: true })
-  })
-}
+    return apiUtils.sendApiSuccess(res, { deleted: true });
+  });
+};
 
-module.exports = ticketsV2
+ticketsV2.ticketHistory = async function (req, res) {
+  const id = req.params.id;
+  const offset = Number(req.query.offset) || 0;
+  const limit = Number(req.query.limit) || 10;
+  let key = req.query.key;
+  // console.log(limit, offset);
+  var ObjectId = require('mongodb').ObjectID;
+  let description = {};
+  if (key) {
+    description = { $regex: `.*${key}*.`, $options: 'i' };
+  }
+  try {
+    var history;
+    if (key) {
+      history = await TicketHistory.find({
+        ticket_id: ObjectId(id),
+        description: { $regex: `.*${key}*.`, $options: 'i' },
+      })
+        .sort('-date')
+        .populate('owner', 'fullname email title _id ')
+        .limit(limit)
+        .skip(offset);
+    } else {
+      history = await TicketHistory.find({ ticket_id: ObjectId(id) })
+        .sort('-date')
+        .populate('owner', 'fullname email title _id ')
+        .limit(limit)
+        .skip(offset);
+    }
+    return apiUtils.sendApiSuccess(res, { id, history });
+  } catch (err) {
+    console.log(err);
+    return apiUtils.sendApiError(res, 400, err);
+  }
+};
+
+module.exports = ticketsV2;

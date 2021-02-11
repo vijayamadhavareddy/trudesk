@@ -45,7 +45,13 @@ import UIkit from 'uikit';
 import moment from 'moment';
 import SpinLoader from 'components/SpinLoader';
 
+import get from '../../../services/apiService';
+
+import debounce from 'lodash.debounce';
+
 const sentimentPath = '/api/v2/sentiment';
+const historyPath = '/api/v2/tickets/history/:id';
+
 const comments = {
   positive: 'fetchTicket',
   negative: 'negative',
@@ -62,6 +68,7 @@ const fetchTicket = (parent) => {
         parent.ticket &&
         parent.ticket.subscribers.findIndex((i) => i._id === parent.props.shared.sessionUser._id) !== -1;
       console.log('settig tic history');
+      parent.fetchHistory();
       History = res.data.ticket.history;
       console.log(History);
       // }, 3000)
@@ -95,6 +102,9 @@ class SingleTicketContainer extends React.Component {
     this.onUpdateTicketGroup = this.onUpdateTicketGroup.bind(this);
     this.onUpdateTicketDueDate = this.onUpdateTicketDueDate.bind(this);
     this.onUpdateTicketTags = this.onUpdateTicketTags.bind(this);
+    this.offset = 0;
+    this.searchKey = '';
+    this.addScrollEvent();
   }
 
   componentDidMount() {
@@ -293,18 +303,65 @@ class SingleTicketContainer extends React.Component {
 
   searchHistory(event) {
     console.log(event);
-    const key = event.target.value;
-    if (!key) {
-      this.ticket.history = History;
-      return;
-    }
-    let filteredHistory = History.map((item) => {
-      if (item.description.includes(key)) {
-        return item;
+    this.searchKey = event.target.value;
+    this.offset = 0;
+    this.fetchHistory();
+    // if (!key) {
+    //   this.ticket.history = History;
+    //   return;
+    // }
+    // let filteredHistory = History.map((item) => {
+    //   if (item.description.includes(key)) {
+    //     return item;
+    //   }
+    // }).filter((item) => item);
+    // console.log(filteredHistory);
+    // this.ticket.history = filteredHistory;
+  }
+
+  fetchHistory() {
+    console.log(this.offset);
+    let path = `${historyPath.replace(/:id/, this.props.ticketId)}`;
+
+    axios.get(`${path}?offset=${this.offset}&key=${this.searchKey}`).then((res) => {
+      console.log('res from api');
+      console.log(res);
+      if (this.offset) {
+        if (res.data.history.length) {
+          let arr = [...this.ticket.history, ...res.data.history];
+          //this.ticket.history.push(res.data.history);
+          this.ticket.history = [...arr];
+          console.log(this.ticket.history);
+        }
+        return;
       }
-    }).filter((item) => item);
-    console.log(filteredHistory);
-    this.ticket.history = filteredHistory;
+      this.ticket.history = res.data.history;
+    });
+  }
+
+  addScrollEvent() {
+    console.log('addinf scroll event');
+
+    setTimeout(() => {
+      var that = this;
+      document.getElementById('ticketHistory').addEventListener(
+        'scroll',
+        debounce(function () {
+          var scrollTop = document.getElementById('ticketHistory').scrollTop;
+          var scrollHeight = document.getElementById('ticketHistory').scrollHeight; // added
+          var offsetHeight = document.getElementById('ticketHistory').offsetHeight;
+          // var clientHeight = document.getElementById('box').clientHeight;
+          var contentHeight = scrollHeight - offsetHeight; // added
+          if (contentHeight <= scrollTop) {
+            // modified
+
+            that.offset += 10;
+            that.fetchHistory();
+            // Now this is called when scroll end!
+          }
+        }, 1500)
+      );
+    }, 1000);
   }
 
   render() {
@@ -773,13 +830,13 @@ class SingleTicketContainer extends React.Component {
                             <input type="text" placeholder="Search" onChange={(evt) => this.searchHistory(evt)} />
                           </div>
                           <hr style={{ padding: 0, margin: 0 }} />
-                          <div className="history-items scrollable" style={{ paddingTop: 12 }}>
+                          <div className="history-items scrollable" id="ticketHistory" style={{ paddingTop: 12 }}>
                             {this.ticket.history &&
-                              this.ticket.history.map((item) => (
+                              this.ticket.history.map((item, index) => (
                                 <div key={item._id} className="history-item">
                                   <time dateTime={helpers.formatDate(item.date, this.props.common.longDateFormat)} />
                                   <em>
-                                    Action by: <span>{item.owner.fullname}</span>
+                                    Action by: <span>{item.owner ? item.owner.fullname : ''}</span>
                                   </em>
                                   <p>{item.description}</p>
                                 </div>

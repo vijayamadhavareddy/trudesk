@@ -49,6 +49,7 @@ import { updateNavChange } from '../../../client/actions/nav';
 @observer
 class TicketsContainer extends React.Component {
   @observable searchTerm = '';
+  @observable showBulkOptions = false;
 
   selectedTickets = [];
   constructor(props) {
@@ -121,6 +122,11 @@ class TicketsContainer extends React.Component {
     else this.selectedTickets = without(this.selectedTickets, id);
 
     this.selectedTickets = uniq(this.selectedTickets);
+    if (this.selectedTickets.length) {
+      this.showBulkOptions = true;
+      return;
+    }
+    this.showBulkOptions = false;
   }
 
   onSetStatus(status) {
@@ -216,8 +222,13 @@ class TicketsContainer extends React.Component {
 
   onSelectAll(e) {
     console.log('check-all');
-    if (e.target.checked) this._selectAll();
-    else this._clearChecked();
+
+    if (e.target.checked) {
+      this.showBulkOptions = true;
+      this._selectAll();
+      return;
+    } else this._clearChecked();
+    this.showBulkOptions = false;
   }
 
   render() {
@@ -327,56 +338,97 @@ class TicketsContainer extends React.Component {
           }
         />
         <PageContent padding={0} paddingBottom={0} extraClass={'uk-position-relative'}>
-          {this.renderMinMenu ? (
-            <div class="row " className={'menu-div'}>
-              <MinMenu
-                title="Active"
-                icon="timer"
-                active={this.props.activeSubItem === 'tickets-active'}
-                href="/tickets/active"
-              ></MinMenu>
-              <MinMenu
-                title="Assigned"
-                icon="assignment_ind"
-                active={this.props.activeSubItem === 'tickets-assigned'}
-                href="/tickets/assigned"
-              ></MinMenu>
-              <MinMenu
-                title="Unassigned"
-                icon="person_add_disabled"
-                active={this.props.activeSubItem === 'tickets-unassigned'}
-                href="/tickets/unassigned"
-              ></MinMenu>
-              <div className={'menu-divider'}></div>
-              <MinMenu
-                title="New"
-                icon="&#xE24D;"
-                active={this.props.activeSubItem === 'tickets-new'}
-                href="/tickets/new"
-              ></MinMenu>
-              <MinMenu
-                title="Pending"
-                icon="&#xE629;"
-                active={this.props.activeSubItem === 'tickets-pending'}
-                href="/tickets/pending"
-              ></MinMenu>
+          <div>
+            {this.renderMinMenu ? (
+              <div class="row " className={'menu-div'}>
+                <MinMenu
+                  title="Active"
+                  icon="timer"
+                  active={this.props.activeSubItem === 'tickets-active'}
+                  href="/tickets/active"
+                ></MinMenu>
+                <MinMenu
+                  title="Assigned"
+                  icon="assignment_ind"
+                  active={this.props.activeSubItem === 'tickets-assigned'}
+                  href="/tickets/assigned"
+                ></MinMenu>
+                <MinMenu
+                  title="Unassigned"
+                  icon="person_add_disabled"
+                  active={this.props.activeSubItem === 'tickets-unassigned'}
+                  href="/tickets/unassigned"
+                ></MinMenu>
+                <div className={'menu-divider'}></div>
+                <MinMenu
+                  title="New"
+                  icon="&#xE24D;"
+                  active={this.props.activeSubItem === 'tickets-new'}
+                  href="/tickets/new"
+                ></MinMenu>
+                <MinMenu
+                  title="Pending"
+                  icon="&#xE629;"
+                  active={this.props.activeSubItem === 'tickets-pending'}
+                  href="/tickets/pending"
+                ></MinMenu>
 
-              <MinMenu
-                title="Open"
-                icon="&#xE2C8;"
-                active={this.props.activeSubItem === 'tickets-open'}
-                href="/tickets/open"
-              ></MinMenu>
-              <MinMenu
-                title="Closed"
-                icon="&#xE2C7;"
-                active={this.props.activeSubItem === 'tickets-closed'}
-                href="/tickets/closed"
-              ></MinMenu>
-            </div>
-          ) : (
-            <div></div>
-          )}
+                <MinMenu
+                  title="Open"
+                  icon="&#xE2C8;"
+                  active={this.props.activeSubItem === 'tickets-open'}
+                  href="/tickets/open"
+                ></MinMenu>
+                <MinMenu
+                  title="Closed"
+                  icon="&#xE2C7;"
+                  active={this.props.activeSubItem === 'tickets-closed'}
+                  href="/tickets/closed"
+                ></MinMenu>
+              </div>
+            ) : (
+              <div></div>
+            )}
+            {this.showBulkOptions && (
+              <div id="bulkOptions" class="d-flex align-bulk-options">
+                <div class="bulk-button-group">
+                  <button
+                    claass="btn default"
+                    onClick={(e) => {
+                      this.onSetStatus(1);
+                    }}
+                  >
+                    set Open
+                  </button>
+                  <button
+                    claass="btn default"
+                    onClick={(e) => {
+                      this.onSetStatus(2);
+                    }}
+                  >
+                    set pending
+                  </button>
+                  <button
+                    claass="btn default"
+                    onClick={(e) => {
+                      this.onSetStatus(3);
+                    }}
+                  >
+                    set closed
+                  </button>
+                  <button
+                    claass="btn default"
+                    onClick={(e) => {
+                      this.onDeleteClicked();
+                    }}
+                  >
+                    Delete
+                  </button>
+                </div>
+              </div>
+            )}
+            {!this.showBulkOptions && <div></div>}
+          </div>
           {/*<SpinLoader active={this.props.loading} />*/}
           <Table
             tableRef={(ref) => (this.ticketsTable = ref)}
