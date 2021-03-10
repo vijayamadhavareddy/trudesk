@@ -71,6 +71,20 @@ var roles = {
       'notices:*'
     ]
   },
+  SE: {
+    id: 'se',
+    name: 'SE',
+    description: 'Service engineer',
+    allowedAction: [
+      'ticket:*',
+      'dashboard:*',
+      'accounts:create edit view delete',
+      'comment:editSelf create delete',
+      'notes:create view',
+      'reports:view',
+      'notices:*'
+    ]
+  },
   user: {
     id: 'user',
     name: 'User',

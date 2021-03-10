@@ -105,6 +105,23 @@ function rolesDefault (callback) {
         })
       },
       function (done) {
+        roleSchema.getRoleByName('SE', function (err, role) {
+          if (err) return done(err)
+          if (role) {
+            return done()
+            // role.updateGrants(supportGrants, done);
+          } else
+            roleSchema.create(
+              {
+                name: 'SE',
+                description: 'Service engineer',
+                grants: roleDefaults.supportGrants
+              },
+              done
+            )
+        })
+      },
+      function (done) {
         roleSchema.getRoleByName('Admin', function (err, role) {
           if (err) return done(err)
           if (role) return done()
